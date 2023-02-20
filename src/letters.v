@@ -1,11 +1,44 @@
+`ifndef _LETTERS_V_
+`define _LETTERS_V_
+
+`include "constants.v"
+
+/**
+ * Checks to see if an ASCII character is a lower case letter.
+ */
+function reg is_lower(input reg[`BYTE] character);
+    begin
+        if ("a" <= character[`BYTE] && "z" >= character[`BYTE]) begin
+            is_lower = 1'h1;
+        end
+        else begin
+            is_lower = 1'h0;
+        end
+    end
+endfunction
+
+/**
+ * Checks to see if an ASCII character is an UPPER CASE letter.
+ */
+function reg is_upper(input reg[`BYTE] character);
+    begin
+        if ("A" <= character[`BYTE] && "Z" >= character[`BYTE]) begin
+            is_upper = 1'h1;
+        end
+        else begin
+            is_upper = 1'h0;
+        end
+    end
+endfunction
+
 /**
  * Converts a lower case ASCII character to UPPER CASE.
  */
-function reg[7:0] to_upper(input reg[7:0] character);
+function reg[`BYTE] to_upper(input reg[`BYTE] character);
     begin
-        to_upper[7:0] = character[7:0];
-        if (8'h61 <= character[7:0] && 8'h7a >= character[7:0]) begin
-            to_upper[7:0] -= 8'h20;
+        to_upper[`BYTE] = character[`BYTE];
+        if (is_lower(character[`BYTE])) begin
+            to_upper[`BYTE] -= 8'h20;
         end
     end
 endfunction
@@ -13,11 +46,13 @@ endfunction
 /**
  * Converts an UPPER CASE ASCII character to lower case.
  */
-function reg[7:0] to_lower(input reg[7:0] character);
+function reg[`BYTE] to_lower(input reg[`BYTE] character);
     begin
-        to_lower[7:0] = character[7:0];
-        if (8'h41 <= character[7:0] && 8'h5a >= character[7:0]) begin
-            to_lower[7:0] += 8'h20;
+        to_lower[`BYTE] = character[`BYTE];
+        if (is_upper(character[`BYTE])) begin
+            to_lower[`BYTE] += 8'h20;
         end
     end
 endfunction
+
+`endif // _LETTERS_V_
