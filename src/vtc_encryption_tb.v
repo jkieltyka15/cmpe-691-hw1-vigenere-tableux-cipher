@@ -46,7 +46,10 @@ module vtc_encryption_tb();
         $display("key length: %d", key_length);
 
         // test encrypt
-        $display("%c", vtc_encrypt("c", "a"));
+        $display("encrypt: %c", vtc_encrypt("c", "a"));
+
+        // teset decrypt
+        $display("decrypt: %c", vtc_decrypt("c", vtc_encrypt("c", "a")));
 
         // close in and out text files
         $fclose(in_file);
