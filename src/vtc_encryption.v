@@ -5,7 +5,7 @@
 `define MAX 10
 
 /**
- * Encrypts a single ascii character using the Vigenere Tableux Cipher.
+ * Encrypts a single ASCII character using the Vigenere Tableux Cipher.
  */
 function reg[`BYTE] vtc_encrypt(input reg[`BYTE] key, input reg[`BYTE] text);
     begin
@@ -25,6 +25,31 @@ function reg[`BYTE] vtc_encrypt(input reg[`BYTE] key, input reg[`BYTE] text);
         end
 
         vtc_encrypt = cipher[`BYTE];
+
+    end
+endfunction
+
+/**
+ * Decrypts a single ASCII character using the Vigenere Tableux Cipher.
+ */
+function reg[`BYTE] vtc_decrypt(input reg[`BYTE] key, input reg[`BYTE] cipher);
+    begin
+        reg[`BYTE] text;
+
+        // convert input to upper case
+        key[`BYTE] = to_upper(key[`BYTE]);
+        cipher[`BYTE] =  to_upper(cipher[`BYTE]);
+        text[`BYTE] = cipher[`BYTE];
+
+        // calculate cipher character
+        if (is_upper(key[`BYTE]) && is_upper(cipher[`BYTE])) begin
+            text[`BYTE] += (key - "A");
+            if ("Z" < text[`BYTE]) begin
+                text[`BYTE] -= 8'h1a;
+            end
+        end
+
+        vtc_decrypt = text[`BYTE];
 
     end
 endfunction
