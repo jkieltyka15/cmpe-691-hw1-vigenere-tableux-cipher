@@ -1,3 +1,5 @@
+`include "letters.v"
+
 module vtc_tb();
 
     reg[7:0] buffer;
@@ -14,10 +16,12 @@ module vtc_tb();
         while(!eof) begin
 
             buffer[7:0] = $fgetc(in_file);
+            
             if ($feof(in_file)) begin
                 eof = 1;
             end 
             else begin
+                buffer[7:0] = to_upper(buffer[7:0]);
                 $fwrite(out_file, "%c", buffer[7:0]);
             end
 
