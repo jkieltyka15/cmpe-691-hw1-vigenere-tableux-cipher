@@ -70,4 +70,34 @@ function reg[`BYTE] vtc_decrypt(input reg[`BYTE] key, input reg[`BYTE] cipher);
     end
 endfunction
 
+/**
+ * Cracks a single ASCII character of the key using the Vigenere Tableux Cipher.
+ *
+ * @param text - The plain text character.
+ * @param cipher - The cipher character.
+ *
+ * @return A cracked key lower case character.
+ */
+function reg[`BYTE] vtc_crack(input reg[`BYTE] text, input reg[`BYTE] cipher);
+    begin
+        reg[`BYTE] key;
+
+        // convert input to lower case
+        text[`BYTE] = to_lower(text[`BYTE]);
+        cipher[`BYTE] =  to_lower(cipher[`BYTE]);
+        key[`BYTE] = cipher[`BYTE];
+
+        // calculate the key character
+        if (is_lower(text[`BYTE]) && is_lower(cipher[`BYTE])) begin
+            key[`BYTE] += "a" - text[`BYTE];
+            if ("a" > key[`BYTE]) begin
+                key[`BYTE] += 8'h1a;
+            end
+        end
+
+        vtc_crack = key[`BYTE];
+
+    end
+endfunction
+
 `endif // _VTC_ENCRYPTION_V_

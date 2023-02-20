@@ -47,6 +47,24 @@ function reg is_upper(input reg[`BYTE] character);
 endfunction
 
 /**
+ * Checks to see if an ASCII character is a letter.
+ *
+ * @param character - The character to check if it is a letter.
+ *
+ * @return 1 if the caracter is a letter. Otherwise 0.
+ */
+function reg is_letter(input reg[`BYTE] character);
+    begin
+        if (is_lower(character[`BYTE]) || is_upper(character[`BYTE])) begin
+            is_letter = 1'h1;
+        end
+        else begin
+            is_letter = 1'h0;
+        end
+    end
+endfunction
+
+/**
  * Converts a lower case ASCII character to UPPER CASE.
  *
  * @param character - The character to convert to UPPER CASE.
