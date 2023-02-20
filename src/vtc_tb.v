@@ -21,7 +21,7 @@ module vtc_tb();
                 eof = 1;
             end 
             else begin
-                buffer[7:0] = to_upper(buffer[7:0]);
+                buffer[7:0] = to_lower(buffer[7:0]);
                 $fwrite(out_file, "%c", buffer[7:0]);
             end
 
