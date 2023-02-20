@@ -60,7 +60,6 @@ module vtc_encryption_tb();
             
                 // encrypt
                 if (encrypt_flag) begin
-                    $display("key: %c, text: %c", key[i], buffer[`BYTE]);
                     buffer[`BYTE] = vtc_encrypt(key[i], buffer[`BYTE]);
                 end
 
@@ -70,7 +69,7 @@ module vtc_encryption_tb();
                 end
 
                 // correct key cycle for non-letters
-                if (! is_lower(buffer[`BYTE]) && ! is_upper(buffer[`BYTE]) && 0 <= i) begin
+                if (! is_letter(buffer[`BYTE]) && 0 <= i) begin
                     i--;
                 end
 
