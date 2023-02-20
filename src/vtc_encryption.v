@@ -1,11 +1,22 @@
+/**
+ * File: vtc_encryption.v
+ *
+ * Contains functions used for the Vigenere Tableux Cipher for
+ * encryption, decryption and key cracking.
+ */
+
 `ifndef _VTC_ENCRYPTION_V_
 `define _VTC_ENCRYPTION_V_
 
 `include "letters.v"
-`define MAX 10
 
 /**
  * Encrypts a single ASCII character using the Vigenere Tableux Cipher.
+ *
+ * @param key - The character used to encrypt the plain text character.
+ * @param text - The plain text character to encrypt.
+ *
+ * @return An encrypted lower case character.
  */
 function reg[`BYTE] vtc_encrypt(input reg[`BYTE] key, input reg[`BYTE] text);
     begin
@@ -18,9 +29,9 @@ function reg[`BYTE] vtc_encrypt(input reg[`BYTE] key, input reg[`BYTE] text);
 
         // calculate cipher character
         if (is_lower(key[`BYTE]) && is_lower(text[`BYTE])) begin
-            cipher[`BYTE] -= (key - "a");
-            if ("a" > cipher[`BYTE]) begin
-                cipher[`BYTE] += 8'h1a;
+            cipher[`BYTE] += (key - "a");
+            if ("z" < cipher[`BYTE]) begin
+                cipher[`BYTE] -= 8'h1a;
             end
         end
 
@@ -31,6 +42,11 @@ endfunction
 
 /**
  * Decrypts a single ASCII character using the Vigenere Tableux Cipher.
+ *
+ * @param key - The character used to decrypt the cipher character.
+ * @param cipher - The cipher character to decrypt.
+ *
+ * @return A decrypted UPPER CASE character.
  */
 function reg[`BYTE] vtc_decrypt(input reg[`BYTE] key, input reg[`BYTE] cipher);
     begin
@@ -41,11 +57,11 @@ function reg[`BYTE] vtc_decrypt(input reg[`BYTE] key, input reg[`BYTE] cipher);
         cipher[`BYTE] =  to_upper(cipher[`BYTE]);
         text[`BYTE] = cipher[`BYTE];
 
-        // calculate cipher character
+        // calculate plain text character
         if (is_upper(key[`BYTE]) && is_upper(cipher[`BYTE])) begin
-            text[`BYTE] += (key - "A");
-            if ("Z" < text[`BYTE]) begin
-                text[`BYTE] -= 8'h1a;
+            text[`BYTE] -= (key - "A");
+            if ("A" > text[`BYTE]) begin
+                text[`BYTE] += 8'h1a;
             end
         end
 
