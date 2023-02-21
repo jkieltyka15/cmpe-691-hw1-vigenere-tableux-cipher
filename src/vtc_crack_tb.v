@@ -8,8 +8,9 @@
  * output: out.txt
  *
  * input file format:
- * <encryption flag> <key>
- * <plain text / cipher text> 
+ * <plain text> 
+ * <cipher text>
+ * ... 
  */
 
 `include "constants.v"
@@ -19,8 +20,8 @@
 module vtc_encryption_tb();
 
     reg[`BYTE] buffer;
-    integer in_file;
-    integer out_file;
+    integer plain_cipher_file;
+    integer key_file;
 
     reg[`BYTE] key[`KIBIBIT][`KIBIBIT];
     reg[`BYTE] text[`KIBIBIT][`KIBIBIT];
@@ -32,19 +33,19 @@ module vtc_encryption_tb();
     initial begin
         
         // open in and out text files
-        in_file = $fopen("in.txt", "r");
-        out_file = $fopen("out.txt", "w");
+        plain_cipher_file = $fopen("plain_cipher.txt", "r");
+        key_file = $fopen("key.txt", "w");
 
         // get each plain text and cipher text pair
-        for (integer i = 0; `MAX_NUM_KEYS > i && ! $feof(in_file); i++) begin
+        for (integer i = 0; `MAX_NUM_KEYS > i && ! $feof(plain_cipher_file); i++) begin
 
             // get the plain text
             buffer[`BYTE] = 8'h0;
             text_length[i] = 0;
-            for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(in_file) && "\n" != buffer[`BYTE]; j++) begin
+            for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]; j++) begin
 
-                buffer[`BYTE] = $fgetc(in_file);
-                if (! $feof(in_file) && "\n" != buffer[`BYTE]) begin
+                buffer[`BYTE] = $fgetc(plain_cipher_file);
+                if (! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]) begin
                     text[i][j] = buffer[`BYTE];
                     text_length[i]++;
                 end
@@ -53,10 +54,10 @@ module vtc_encryption_tb();
 
             // get the cipher text
             buffer[`BYTE] = 8'h0;
-            for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(in_file) && "\n" != buffer[`BYTE]; j++) begin
+            for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]; j++) begin
 
-                buffer[`BYTE] = $fgetc(in_file);
-                if (! $feof(in_file) && "\n" != buffer[`BYTE]) begin
+                buffer[`BYTE] = $fgetc(plain_cipher_file);
+                if (! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]) begin
                     cipher[i][j] = buffer[`BYTE];
                 end
 
@@ -66,26 +67,38 @@ module vtc_encryption_tb();
 
         end
 
-        // write plain text key pairs to output file
+        // crack vtc keys
+        for (integer i = 0; num_of_pairs > i; i++) begin
+            
+            key_length[i] = 0;
+            
+            for (integer j = 0; text_length[i] > j; j++) begin
+
+                if (is_letter(text[i][j]) && is_letter(cipher[i][j])) begin
+                    key[i][key_length[i]] = vtc_crack(text[i][j], cipher[i][j]);
+                    key_length[i]++;
+                end
+
+            end
+
+        end
+
+        // write vtc keys to output file
         for (integer i = 0; num_of_pairs > i; i++) begin
 
-            for (integer j = 0; text_length[i] > j; j++) begin
-                $fwrite(out_file, "%c", text[i][j]);
+            for (integer j = 0; key_length[i] > j; j++) begin
+
+                $fwrite(key_file, "%c", key[i][j]);
+
             end
 
-            $fwrite(out_file, "\n");
-
-            for (integer j = 0; text_length[i] > j; j++) begin
-                $fwrite(out_file, "%c", cipher[i][j]);
-            end
-
-            $fwrite(out_file, "\n");
+            $fwrite(key_file, "\n");
 
         end
 
         // close in and out text files
-        $fclose(in_file);
-        $fclose(out_file);
+        $fclose(plain_cipher_file);
+        $fclose(key_file);
     
     end
 
