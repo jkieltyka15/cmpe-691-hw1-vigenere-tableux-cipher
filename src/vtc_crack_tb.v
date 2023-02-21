@@ -18,8 +18,16 @@
 
 module vtc_encryption_tb();
 
+    reg[`BYTE] buffer;
     integer in_file;
     integer out_file;
+
+    reg[`BYTE] key[`KIBIBIT][`KIBIBIT];
+    reg[`BYTE] text[`KIBIBIT][`KIBIBIT];
+    reg[`BYTE] cipher[`KIBIBIT][`KIBIBIT];
+    integer text_length[`KIBIBIT];
+    integer key_length[`KIBIBIT];
+    integer num_of_pairs = 0;
 
     initial begin
         
@@ -27,13 +35,53 @@ module vtc_encryption_tb();
         in_file = $fopen("in.txt", "r");
         out_file = $fopen("out.txt", "w");
 
-        // test cracking key
-        $display("%c", vtc_crack("T", "x"));
-        $display("%c", vtc_crack("H", "e"));
-        $display("%c", vtc_crack("I", "w"));
-        $display("%c", vtc_crack("S", "v"));
-        $display("%c", vtc_crack("I", "c"));
-        $display("%c", vtc_crack("S", "k"));
+        // get each plain text and cipher text pair
+        for (integer i = 0; `MAX_NUM_KEYS > i && ! $feof(in_file); i++) begin
+
+            // get the plain text
+            buffer[`BYTE] = 8'h0;
+            text_length[i] = 0;
+            for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(in_file) && "\n" != buffer[`BYTE]; j++) begin
+
+                buffer[`BYTE] = $fgetc(in_file);
+                if (! $feof(in_file) && "\n" != buffer[`BYTE]) begin
+                    text[i][j] = buffer[`BYTE];
+                    text_length[i]++;
+                end
+                
+            end
+
+            // get the cipher text
+            buffer[`BYTE] = 8'h0;
+            for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(in_file) && "\n" != buffer[`BYTE]; j++) begin
+
+                buffer[`BYTE] = $fgetc(in_file);
+                if (! $feof(in_file) && "\n" != buffer[`BYTE]) begin
+                    cipher[i][j] = buffer[`BYTE];
+                end
+
+            end
+
+            num_of_pairs++;
+
+        end
+
+        // write plain text key pairs to output file
+        for (integer i = 0; num_of_pairs > i; i++) begin
+
+            for (integer j = 0; text_length[i] > j; j++) begin
+                $fwrite(out_file, "%c", text[i][j]);
+            end
+
+            $fwrite(out_file, "\n");
+
+            for (integer j = 0; text_length[i] > j; j++) begin
+                $fwrite(out_file, "%c", cipher[i][j]);
+            end
+
+            $fwrite(out_file, "\n");
+
+        end
 
         // close in and out text files
         $fclose(in_file);
