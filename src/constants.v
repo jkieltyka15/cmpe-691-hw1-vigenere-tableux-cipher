@@ -13,5 +13,6 @@
 
 // numerical constants
 `define MAX_KEY_STR_LEN 1024
+`define MAX_NUM_KEYS    1024
 
 `endif // _CONSTANTS_V_
