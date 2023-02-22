@@ -13,8 +13,8 @@
 /**
  * Encrypts a single ASCII character using the Vigenere Tableux Cipher.
  *
- * @param key - The character used to encrypt the plain text character.
- * @param text - The plain text character to encrypt.
+ * @param key - The character used to encrypt the plaintext character.
+ * @param text - The plaintext character to encrypt.
  *
  * @return An encrypted lower case character.
  */
@@ -57,7 +57,7 @@ function reg[`BYTE] vtc_decrypt(input reg[`BYTE] key, input reg[`BYTE] cipher);
         cipher[`BYTE] =  to_upper(cipher[`BYTE]);
         text[`BYTE] = cipher[`BYTE];
 
-        // calculate plain text character
+        // calculate plaintext character
         if (is_upper(key[`BYTE]) && is_upper(cipher[`BYTE])) begin
             text[`BYTE] -= (key - "A");
             if ("A" > text[`BYTE]) begin
@@ -73,7 +73,7 @@ endfunction
 /**
  * Cracks a single ASCII character of the key using the Vigenere Tableux Cipher.
  *
- * @param text - The plain text character.
+ * @param text - The plaintext character.
  * @param cipher - The cipher character.
  *
  * @return A cracked key lower case character.
