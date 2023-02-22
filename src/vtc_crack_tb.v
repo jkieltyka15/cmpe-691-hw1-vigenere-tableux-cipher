@@ -2,14 +2,14 @@
  * File: vtc_crack_tb.v
  *
  * Contains the testbench for testing cracking Vigenere Tableux Cipher
- * when multiple pairs plain text and cipher text is provided. 
+ * when multiple pairs plaintext and ciphertext is provided. 
  *
  * input: in.txt
  * output: out.txt
  *
  * input file format:
- * <plain text> 
- * <cipher text>
+ * <plaintext> 
+ * <ciphertext>
  * ... 
  */
 
@@ -19,7 +19,8 @@
 
 module vtc_encryption_tb();
 
-    reg valid_key = 1'h1;
+    reg is_valid_key = 1'h1;
+    integer longest_key = 0;
 
     reg[`BYTE] buffer;
     integer plain_cipher_file;
@@ -44,10 +45,10 @@ module vtc_encryption_tb();
         plain_cipher_file = $fopen("plain_cipher.txt", "r");
         key_file = $fopen("key.txt", "w");
 
-        // get each plain text and cipher text pair
+        // get each plaintext and ciphertext pair
         for (integer i = 0; `MAX_NUM_KEYS > i && ! $feof(plain_cipher_file); i++) begin
 
-            // get the plain text
+            // get the plaintext
             buffer[`BYTE] = 8'h0;
             text_length[i] = 0;
             for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]; j++) begin
@@ -60,7 +61,7 @@ module vtc_encryption_tb();
                 
             end
 
-            // get the cipher text
+            // get the ciphertext
             buffer[`BYTE] = 8'h0;
             for (integer j = 0; `MAX_KEY_STR_LEN > j && ! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]; j++) begin
 
@@ -130,17 +131,70 @@ module vtc_encryption_tb();
 
         end
 
-        // write vtc keys to output file
-        for (integer i = 0; num_of_pairs > i; i++) begin
+        // find the longest key
+        tmp_key_length = 0;
+        for (integer i = 0; i < num_of_pairs; i++) begin
+            if (tmp_key_length < key_length[i]) begin
+                longest_key = i;
+                tmp_key_length = key_length[i];
+            end
+        end
 
-            for (integer j = 0; key_length[i] > j; j++) begin
+        // verify keys with the same length as the longest key are the same
+        for (integer i = longest_key + 1; i < num_of_pairs && is_valid_key; i++) begin
 
-                $fwrite(key_file, "%c", key[i][j]);
+            if (key_length[longest_key] == key_length[i]) begin
+
+                for (integer j = 0; j < key_length[longest_key] && is_valid_key; j++) begin
+
+                    // invalid key found
+                    if (key[longest_key][j] != key[i][j]) begin
+                        is_valid_key = 1'h0;
+                    end
+
+                end
+
+            end
+        
+        end
+        
+        // verify key is valid for all plaintext ciphertext pairs
+        if (is_valid_key) begin
+            
+            for (integer i = 0; i < num_of_pairs && is_valid_key; i++) begin
+
+                key_iterator = 0;
+                tmp_key_length = 0;
+
+                for (integer j = 0; j < text_length[i] && is_valid_key; j++) begin
+
+                    buffer[`BYTE] = vtc_encrypt(key[longest_key][key_iterator], text[i][j]);
+                    if (buffer[`BYTE] != cipher[i][j]) begin
+                        is_valid_key = 1'h0;
+                    end
+
+                    if (is_letter(buffer[`BYTE])) begin
+                        key_iterator = (key_iterator >= key_length[longest_key] - 1) ? 0 : key_iterator + 1;
+                    end
+
+                end
 
             end
 
-            $fwrite(key_file, "\n");
+        end
 
+        // write the key to the output file if it was valid
+        if (is_valid_key) begin
+        
+            for (integer i = 0; key_length[longest_key] > i; i++) begin
+                $fwrite(key_file, "%c", key[longest_key][i]);
+            end
+
+        end
+
+        // key was not valid
+        else begin
+            $fwrite(key_file, "NO VALID KEY WAS FOUND");
         end
 
         // close in and out text files
