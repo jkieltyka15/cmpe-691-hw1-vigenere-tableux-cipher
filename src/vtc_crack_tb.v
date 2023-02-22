@@ -19,16 +19,24 @@
 
 module vtc_encryption_tb();
 
+    reg valid_key = 1'h1;
+
     reg[`BYTE] buffer;
     integer plain_cipher_file;
     integer key_file;
 
+    // used for cracking vtc key
     reg[`BYTE] key[`KIBIBIT][`KIBIBIT];
     reg[`BYTE] text[`KIBIBIT][`KIBIBIT];
     reg[`BYTE] cipher[`KIBIBIT][`KIBIBIT];
     integer text_length[`KIBIBIT];
     integer key_length[`KIBIBIT];
     integer num_of_pairs = 0;
+
+    // used for key minimization
+    integer tmp_key_length = 0;
+    integer key_iterator = 0;
+    reg isMinimized = 1'h0;
 
     initial begin
         
@@ -79,6 +87,45 @@ module vtc_encryption_tb();
                     key_length[i]++;
                 end
 
+            end
+
+        end
+
+        // minimize vtc keys
+        for (integer i = 0; num_of_pairs > i; i++) begin
+
+            tmp_key_length = 1;
+            isMinimized = 1'h0;
+
+            for (integer j = tmp_key_length; key_length[i] > j && ! isMinimized; j++) begin
+                
+                // character matching beginning of key found
+                if (key[i][0] == key[i][j]) begin
+
+                    tmp_key_length = j;
+                    isMinimized = 1'h1;
+
+                    // verify minimized key is valid
+                    key_iterator = 0;
+                    for (integer z = 0; key_length[i] > z && isMinimized; z++) begin
+
+                        // invalid minimized key
+                        if (key[i][key_iterator] != key[i][z]) begin
+                            isMinimized = 1'h0;
+                            tmp_key_length = z;
+                        end
+
+                        key_iterator = (key_iterator >= tmp_key_length - 1) ? 0 : key_iterator + 1;
+
+                    end
+
+                end
+
+            end
+
+            // minimized key found
+            if (isMinimized) begin
+                key_length[i] = tmp_key_length;
             end
 
         end
