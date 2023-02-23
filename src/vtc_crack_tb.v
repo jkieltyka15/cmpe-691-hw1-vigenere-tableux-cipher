@@ -55,7 +55,7 @@ module vtc_encryption_tb();
 
                 buffer[`BYTE] = $fgetc(plain_cipher_file);
                 if (! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]) begin
-                    text[i][j] = buffer[`BYTE];
+                    text[i][j] = to_upper(buffer[`BYTE]);
                     text_length[i]++;
                 end
                 
@@ -67,7 +67,7 @@ module vtc_encryption_tb();
 
                 buffer[`BYTE] = $fgetc(plain_cipher_file);
                 if (! $feof(plain_cipher_file) && "\n" != buffer[`BYTE]) begin
-                    cipher[i][j] = buffer[`BYTE];
+                    cipher[i][j] = to_lower(buffer[`BYTE]);
                 end
 
             end
